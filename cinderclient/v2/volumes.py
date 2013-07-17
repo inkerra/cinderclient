@@ -121,6 +121,7 @@ class VolumeManager(base.ManagerWithFind):
                name=None, description=None,
                volume_type=None, user_id=None,
                project_id=None, availability_zone=None,
+               read_only=False,
                metadata=None, imageRef=None, scheduler_hints=None):
         """Create a volume.
 
@@ -149,6 +150,7 @@ class VolumeManager(base.ManagerWithFind):
                            'snapshot_id': snapshot_id,
                            'name': name,
                            'description': description,
+                           'read_only': read_only,
                            'volume_type': volume_type,
                            'user_id': user_id,
                            'project_id': project_id,
