@@ -63,6 +63,11 @@ def _find_volume(cs, volume):
     return utils.find_resource(cs.volumes, volume)
 
 
+def _find_volume_permission(cs, volume_acl_permission):
+    """Get a volume permission by ID."""
+    return utils.find_resource(cs.volume_acl, volume_acl_permission)
+
+
 def _find_volume_snapshot(cs, snapshot):
     """Get a volume snapshot by ID."""
     return utils.find_resource(cs.volume_snapshots, snapshot)
@@ -175,7 +180,8 @@ def do_list(cs, args):
         setattr(vol, 'attached_to', ','.join(map(str, servers)))
 
     utils.print_list(volumes, ['ID', 'Status', 'Name',
-                     'Size', 'Volume Type', 'Bootable', 'Attached to'])
+                               'Size', 'Volume Type', 'Bootable',
+                               'Attached to'])
 
 
 @utils.arg('volume',
@@ -607,6 +613,98 @@ def do_type_key(cs, args):
         vtype.set_keys(keypair)
     elif args.action == 'unset':
         vtype.unset_keys(list(keypair.keys()))
+
+
+@utils.arg('volume_id', metavar='<volume_id>',
+           help='ID of the volume.')
+@utils.arg('--entity-id', metavar='<entity_id>',
+           help='ID of the entity. (Optional for "user", Default: own')
+@utils.arg('--type', choices=['user', 'group'],
+           help='Type of subject.')
+@utils.arg('access_permission', metavar='<access_permission>',
+           type=int,
+           choices=range(9),
+           help='''Access permission:
+           1: Read - the user can only read the volume,
+           including reading the content of the volume,
+           the volume properties and the volume metadata;
+           2: Write - the user can read and write the volume.
+           The user can do any operations on this volume,
+           including all the API operations.
+           This permission includes Read permission;
+           3: Permission Read - the user can read the permission list for
+           the volume and be able to see who can access this volume with which
+           permission level;
+           4: Permission Write - the user can read and edit the permission list
+           for the volume and be able to see and edit who can access the volume
+           with which permission level.
+           This permission includes Permission Read;
+           5: Read+Permission Read;
+           6: Write+Permission Read;
+           7: Full access - This permission includes all the other permissions
+           and equals to Write+Permission Write.
+           8: Read+Permission Write;
+           ''')
+@utils.service_type('volume')
+def do_permission_set(cs, args):
+    """Creates a volume permission or updates if it exists."""
+    volume_permission = cs.volume_acl.create(args.volume_id, args.type,
+                                             args.entity_id,
+                                             args.access_permission)
+    info = dict()
+    info.update(volume_permission._info)
+
+    if 'links' in info:
+        info.pop('links')
+
+    utils.print_dict(info)
+
+
+@utils.arg('id', metavar='<volume_permission>',
+           type=int,
+           help='ID of the volume permission to delete.')
+@utils.service_type('volume')
+def do_permission_delete(cs, args):
+    """Undo a volume permission."""
+    cs.volume_acl.delete(args.id)
+
+
+@utils.arg('--volume-id', metavar='<volume_id>',
+           help='ID of the volume (Optional).')
+@utils.service_type('volume')
+def do_permission_list(cs, args):
+    """List volume permissions."""
+    if args.volume_id:
+        volume_permissions = cs.volume_acl.get_all_by_volume(args.volume_id)
+    else:
+        volume_permissions = cs.volume_acl.list()
+    columns = ['ID', 'Volume ID', 'Type', 'Entity ID', 'Access Permission']
+    utils.print_list(volume_permissions, columns)
+
+
+@utils.arg('volume_permission', metavar='<volume_permission>',
+           help='ID of the volume permission to show details.')
+@utils.service_type('volume')
+def do_permission_show(cs, args):
+    """Show details about a volume permission."""
+    volume_permission = _find_volume_permission(cs, args.volume_permission)
+    info = dict()
+    info.update(volume_permission._info)
+
+    if 'links' in info:
+        info.pop('links')
+
+    utils.print_dict(info)
+
+
+@utils.arg('volume_id', metavar='<volume>',
+           help='ID or name of the volume.')
+@utils.service_type('volume')
+def do_permission_get(cs, args):
+    """Get volume permission."""
+    access_permission = cs.volume_acl.get_access(args.volume_id)
+    columns = ['Access Permission']
+    utils.print_list([access_permission], columns)
 
 
 def do_endpoints(cs, args):
