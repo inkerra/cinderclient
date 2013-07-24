@@ -165,7 +165,7 @@ def do_list(cs, args):
         servers = [s.get('server_id') for s in vol.attachments]
         setattr(vol, 'attached_to', ','.join(map(str, servers)))
     utils.print_list(volumes, ['ID', 'Status', 'Display Name', 'Size',
-                               'Volume Type', 'Bootable', 'Read Only',
+                               'Volume Type', 'Bootable', 'Access Permission',
                                'Attached to'])
 
 

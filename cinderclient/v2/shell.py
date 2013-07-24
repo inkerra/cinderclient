@@ -163,7 +163,7 @@ def do_list(cs, args):
 
     utils.print_list(volumes, ['ID', 'Status', 'Name',
                                'Size', 'Volume Type', 'Bootable',
-                               'Read Only',
+                               'Access Permission',
                                'Attached to'])
 
 
