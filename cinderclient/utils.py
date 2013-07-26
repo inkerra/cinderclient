@@ -293,7 +293,3 @@ def slugify(value):
     value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
     value = six.text_type(_slugify_strip_re.sub('', value).strip().lower())
     return _slugify_hyphenate_re.sub('-', value)
-
-
-def string_to_bool(arg):
-    return arg.strip().lower() in ('t', 'true', 'yes', 'y', '1')
