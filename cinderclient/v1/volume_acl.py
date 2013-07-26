@@ -21,7 +21,7 @@ from cinderclient import base
 
 
 class VolumeACLPermission(base.Resource):
-    """Volume permission"""
+    """Volume ACL permission."""
     def __repr__(self):
         return "<VolumeACLPermission: %s>" % self.id
 
