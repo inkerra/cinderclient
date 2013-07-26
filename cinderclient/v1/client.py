@@ -21,6 +21,7 @@ from cinderclient.v1 import services
 from cinderclient.v1 import volumes
 from cinderclient.v1 import volume_snapshots
 from cinderclient.v1 import volume_types
+from cinderclient.v1 import volume_acl
 from cinderclient.v1 import volume_backups
 from cinderclient.v1 import volume_backups_restore
 from cinderclient.v1 import volume_transfers
@@ -58,6 +59,7 @@ class Client(object):
         self.volumes = volumes.VolumeManager(self)
         self.volume_snapshots = volume_snapshots.SnapshotManager(self)
         self.volume_types = volume_types.VolumeTypeManager(self)
+        self.volume_acl = volume_acl.VolumeACLPermissionManager(self)
         self.quota_classes = quota_classes.QuotaClassSetManager(self)
         self.quotas = quotas.QuotaSetManager(self)
         self.backups = volume_backups.VolumeBackupManager(self)

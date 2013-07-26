@@ -63,6 +63,11 @@ def _find_volume(cs, volume):
     return utils.find_resource(cs.volumes, volume)
 
 
+def _find_volume_permission(cs, volume_acl_permission):
+    """Get a volume permission by ID."""
+    return utils.find_resource(cs.volume_acl, volume_acl_permission)
+
+
 def _find_volume_snapshot(cs, snapshot):
     """Get a volume snapshot by ID."""
     return utils.find_resource(cs.volume_snapshots, snapshot)
@@ -159,8 +164,9 @@ def do_list(cs, args):
     for vol in volumes:
         servers = [s.get('server_id') for s in vol.attachments]
         setattr(vol, 'attached_to', ','.join(map(str, servers)))
-    utils.print_list(volumes, ['ID', 'Status', 'Display Name',
-                     'Size', 'Volume Type', 'Bootable', 'Attached to'])
+    utils.print_list(volumes, ['ID', 'Status', 'Display Name', 'Size',
+                               'Volume Type', 'Bootable', 'Access Permission',
+                               'Attached to'])
 
 
 @utils.arg('volume', metavar='<volume>', help='ID of the volume.')
@@ -524,6 +530,87 @@ def do_type_key(cs, args):
             vtype.set_keys(keypair)
         elif args.action == 'unset':
             vtype.unset_keys(list(keypair.keys()))
+
+
+@utils.arg('volume', metavar='<volume>',
+           help='ID of the volume.')
+@utils.arg('--user-or-group-id', metavar='<user_or_group_id>',
+           help='ID of the user or group.')
+@utils.arg('--type', metavar='<user|group>',
+           help='Type of subject.')
+@utils.arg('access_permission', metavar='<access_permission>',
+           type=int,
+           help='''Access permission:
+           1: Read - the user can only read the volume,
+           including reading the content of the volume,
+           the volume properties and the volume metadata;
+           2: Write - the user can read and write the volume.
+           The user can do any operations on this volume,
+           including all the API operations.
+           This permission includes Read permission;
+           3: Permission Read - the user can read the permission list for
+           the volume and be able to see who can access this volume with which
+           permission level;
+           4: Permission Write - the user can read and edit the permission list
+           for the volume and be able to see and edit who can access the volume
+           with which permission level.
+           This permission includes Permission Read;
+           5: Read+Permission Read;
+           6: Write+Permission Read;
+           7: Full access - This permission inludes all the other permissions
+           and equals to Write+Permission Write.
+           ''')
+@utils.service_type('volume')
+def do_permission_create(cs, args):
+    """Creates a volume permission."""
+    volume_permission = cs.volume_acl.create(args.volume, args.type,
+                                             args.user_or_group_id,
+                                             args.access_permission)
+    info = dict()
+    info.update(volume_permission._info)
+
+    if 'links' in info:
+        info.pop('links')
+
+    utils.print_dict(info)
+
+
+@utils.arg('id', metavar='<volume_permission>',
+           help='ID of the volume permission to delete.')
+@utils.service_type('volume')
+def do_permission_delete(cs, args):
+    """Undo a volume permission."""
+    cs.volume_acl.delete(args.id)
+
+
+#@utils.arg('--volume_id', metavar='<volume_id>',
+#           help='ID of the volume (Optional).')
+@utils.service_type('volume')
+def do_permission_list(cs, args):
+    """List all the volume permissions."""
+    #if args.volume_id:
+    #    volume_permissions = cs.volume_acl.get_all_by_volume(args.volume_id)
+    #else:
+    #    volume_permissions = cs.volume_acl.list()
+    volume_permissions = cs.volume_acl.list()
+    columns = ['ID', 'Volume ID', 'Type', 'User or group ID',
+               'Access Permission']
+    utils.print_list(volume_permissions, columns)
+
+
+@utils.arg('volume_permission', metavar='<volume_permission>',
+           help='ID of the volume permission to show details.')
+@utils.service_type('volume')
+def do_permission_show(cs, args):
+    """Show details about a volume permission."""
+    volume_permission = _find_volume_permission(cs, args.volume_permission)
+    info = dict()
+    info.update(volume_permission._info)
+
+    if 'links' in info:
+        info.pop('links')
+
+    utils.print_dict(info)
 
 
 def do_endpoints(cs, args):
