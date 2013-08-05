@@ -536,10 +536,11 @@ def do_type_key(cs, args):
            help='ID of the volume.')
 @utils.arg('--user-or-group-id', metavar='<user_or_group_id>',
            help='ID of the user or group.')
-@utils.arg('--type', metavar='<user|group>',
+@utils.arg('--type', choices=['user', 'group'],
            help='Type of subject.')
 @utils.arg('access_permission', metavar='<access_permission>',
            type=int,
+           choices=range(8),
            help='''Access permission:
            1: Read - the user can only read the volume,
            including reading the content of the volume,
@@ -561,8 +562,8 @@ def do_type_key(cs, args):
            and equals to Write+Permission Write.
            ''')
 @utils.service_type('volume')
-def do_permission_create(cs, args):
-    """Creates a volume permission."""
+def do_permission_set(cs, args):
+    """Creates a volume permission or updates if it exists."""
     volume_permission = cs.volume_acl.create(args.volume, args.type,
                                              args.user_or_group_id,
                                              args.access_permission)
@@ -576,6 +577,7 @@ def do_permission_create(cs, args):
 
 
 @utils.arg('id', metavar='<volume_permission>',
+           type=int,
            help='ID of the volume permission to delete.')
 @utils.service_type('volume')
 def do_permission_delete(cs, args):
@@ -583,16 +585,15 @@ def do_permission_delete(cs, args):
     cs.volume_acl.delete(args.id)
 
 
-#@utils.arg('--volume_id', metavar='<volume_id>',
-#           help='ID of the volume (Optional).')
+@utils.arg('--volume-id', metavar='<volume_id>',
+           help='ID of the volume (Optional).')
 @utils.service_type('volume')
 def do_permission_list(cs, args):
     """List all the volume permissions."""
-    #if args.volume_id:
-    #    volume_permissions = cs.volume_acl.get_all_by_volume(args.volume_id)
-    #else:
-    #    volume_permissions = cs.volume_acl.list()
-    volume_permissions = cs.volume_acl.list()
+    if args.volume_id:
+        volume_permissions = cs.volume_acl.get_all_by_volume(args.volume_id)
+    else:
+        volume_permissions = cs.volume_acl.list()
     columns = ['ID', 'Volume ID', 'Type', 'User or group ID',
                'Access Permission']
     utils.print_list(volume_permissions, columns)
