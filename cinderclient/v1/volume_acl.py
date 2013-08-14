@@ -61,6 +61,14 @@ class VolumeACLPermissionManager(base.ManagerWithFind):
         return self._get("/os-volume-acl/%s" % volume_permission_id,
                          "volume_acl_permission")
 
+    def get_access(self, volume_id):
+        """Get volume permission.
+        :param volume_id: the ID of the volume.
+        :rtype: :class:`VolumeACLPermission`
+        """
+        return self._get("/os-volume-acl/access?volume_id=%s" % volume_id,
+                         "volume_acl_permission")
+
     def get_all_by_volume(self, volume_id, detailed=True):
         """Get a list of all volume permissions for a volume.
 

@@ -611,7 +611,7 @@ def do_type_key(cs, args):
 @utils.arg('volume_id', metavar='<volume_id>',
            help='ID of the volume.')
 @utils.arg('--user-or-group-id', metavar='<user_or_group_id>',
-           help='ID of the user or group.')
+           help='ID of the user or group. (Optional for "user", Default: own')
 @utils.arg('--type', choices=['user', 'group'],
            help='Type of subject.')
 @utils.arg('access_permission', metavar='<access_permission>',
@@ -688,6 +688,16 @@ def do_permission_show(cs, args):
         info.pop('links')
 
     utils.print_dict(info)
+
+
+@utils.arg('volume_id', metavar='<volume>',
+           help='ID or name of the volume.')
+@utils.service_type('volume')
+def do_permission_get(cs, args):
+    """Get volume permission."""
+    access_permission = cs.volume_acl.get_access(args.volume_id)
+    columns = ['Access Permission']
+    utils.print_list([access_permission], columns)
 
 
 def do_endpoints(cs, args):

@@ -22,7 +22,7 @@ from cinderclient.v2 import services
 from cinderclient.v2 import volumes
 from cinderclient.v2 import volume_snapshots
 from cinderclient.v2 import volume_types
-from cinderclient.v2 import volume_acl
+from cinderclient.v1 import volume_acl
 from cinderclient.v2 import volume_backups
 from cinderclient.v2 import volume_backups_restore
 from cinderclient.v1 import volume_transfers
