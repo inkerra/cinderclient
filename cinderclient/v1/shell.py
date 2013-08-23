@@ -551,7 +551,7 @@ def do_type_key(cs, args):
            help='Type of subject.')
 @utils.arg('access_permission', metavar='<access_permission>',
            type=int,
-           choices=range(8),
+           choices=range(9),
            help='''Access permission:
            1: Read - the user can only read the volume,
            including reading the content of the volume,
@@ -571,6 +571,7 @@ def do_type_key(cs, args):
            6: Write+Permission Read;
            7: Full access - This permission includes all the other permissions
            and equals to Write+Permission Write.
+           8: Read+Permission Write;
            ''')
 @utils.service_type('volume')
 def do_permission_set(cs, args):
